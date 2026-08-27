@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: "https://scamshield-backend-oi0g.onrender.com/api",
+  baseURL: "https://scamshield-backend-oi0g.onrender.com",
   headers: { 'Content-Type': 'application/json' }
 });
 
