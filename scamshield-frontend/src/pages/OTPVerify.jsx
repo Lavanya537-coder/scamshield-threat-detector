@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { authAPI } from '../api'; // నీ api.js ఫైల్ ఎక్కడ ఉందో ఆ పాత్ ఇక్కడ ఇచ్చుకో (ఉదాహరణకు './api' లేదా '../api')
 
 export default function OTPVerify() {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
@@ -40,7 +41,6 @@ export default function OTPVerify() {
   };
 
   const handleKeyDown = (index, e) => {
-    // Backspace నొక్కినప్పుడు పాత బాక్స్‌కి వెళ్ళడం
     if (e.key === 'Backspace' && !otp[index] && index > 0) {
       inputRefs.current[index - 1]?.focus();
     }
@@ -69,27 +69,16 @@ export default function OTPVerify() {
     setSuccessMsg('');
 
     try {
-      // 🔴 డైరెక్ట్ గా పోర్ట్ 5000 కి కనెక్ట్ చేస్తున్నాం
-      const response = await fetch('http://localhost:5000/api/auth/verify-otp', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email: email, otp: otpCode }),
-      });
+      // 🟢 మనం రెండర్ కోసం సెట్ చేసుకున్న authAPI వాడాలి
+      const response = await authAPI.verifyOTP({ email: email, otp: otpCode });
 
-      const data = await response.json();
+      setSuccessMsg('Email verified successfully! Redirecting...');
+      setTimeout(() => {
+        navigate('/login', { state: { message: 'Email verified! Please login.' } });
+      }, 1500);
 
-      if (response.ok) {
-        setSuccessMsg('Email verified successfully! Redirecting...');
-        setTimeout(() => {
-          navigate('/login', { state: { message: 'Email verified! Please login.' } });
-        }, 1500);
-      } else {
-        setError(data.message || 'Verification failed. Invalid or expired OTP.');
-      }
     } catch (err) {
-      setError('Server connection error. Please make sure backend is running on port 5000.');
+      setError(err.response?.data?.message || 'Verification failed. Invalid or expired OTP.');
     } finally {
       setLoading(false);
     }
@@ -206,7 +195,7 @@ export default function OTPVerify() {
               Didn't receive the code?{' '}
               <button
                 type="button"
-                onClick={() => alert('New OTP requested. Please check your mail/terminal.')}
+                onClick={() => alert('New OTP requested. Please check your mail.')}
                 style={{
                   background: 'none',
                   border: 'none',
