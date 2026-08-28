@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { authAPI } from '../api'; // నీ api.js ఫైల్ ఎక్కడ ఉందో ఆ పాత్ ఇక్కడ ఇచ్చుకో (ఉదాహరణకు './api' లేదా '../api')
+import API from '../api';
 
 export default function OTPVerify() {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
@@ -13,7 +13,6 @@ export default function OTPVerify() {
   const location = useLocation();
   const email = location.state?.email || '';
 
-  // 2 Min Countdown Timer
   useEffect(() => {
     if (timer <= 0) return;
     const countdown = setInterval(() => {
@@ -34,7 +33,6 @@ export default function OTPVerify() {
     newOtp[index] = value;
     setOtp(newOtp);
 
-    // Auto-focus Next Input Box
     if (value !== '' && index < 5) {
       inputRefs.current[index + 1]?.focus();
     }
@@ -69,8 +67,7 @@ export default function OTPVerify() {
     setSuccessMsg('');
 
     try {
-      // 🟢 మనం రెండర్ కోసం సెట్ చేసుకున్న authAPI వాడాలి
-      const response = await authAPI.verifyOTP({ email: email, otp: otpCode });
+      const response = await API.post('/auth/verify-otp', { email: email, otp: otpCode });
 
       setSuccessMsg('Email verified successfully! Redirecting...');
       setTimeout(() => {
@@ -99,7 +96,6 @@ export default function OTPVerify() {
           boxShadow: '0 20px 50px rgba(0, 0, 0, 0.5)'
         }}
       >
-        {/* Shield Icon */}
         <div style={{
           width: '70px',
           height: '70px',
@@ -195,7 +191,7 @@ export default function OTPVerify() {
               Didn't receive the code?{' '}
               <button
                 type="button"
-                onClick={() => alert('New OTP requested. Please check your mail.')}
+                onClick={() => alert('New OTP requested.')}
                 style={{
                   background: 'none',
                   border: 'none',
